@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo 목록</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 상단 유저 바 */
+        .topbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .user-greeting {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .user-greeting span {
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .btn-logout {
+            background: none;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #f3f4f6;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .btn-add {
+            background-color: #4f46e5;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn-add:hover { background-color: #4338ca; }
+
+        .empty-box {
+            text-align: center;
+            padding: 60px 0;
+            color: #aaa;
+            font-size: 16px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .todo-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .todo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            transition: box-shadow 0.2s;
+        }
+
+        .todo-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+        .todo-card.done { opacity: 0.55; }
+
+        .todo-card.done .todo-title {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-card input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #4f46e5;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .todo-content { flex: 1; min-width: 0; }
+
+        .todo-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .todo-desc {
+            font-size: 13px;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-delete {
+            background: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #ef4444;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-delete:hover {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 유저 정보 + 로그아웃 -->
+    <div class="topbar">
+        <span class="user-greeting">안녕하세요, <span th:text="${nickname}">닉네임</span>님!</span>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn-logout">로그아웃</button>
+        </form>
+    </div>
+
+    <div class="header">
+        <h1>📝 Todo 목록</h1>
+        <a th:href="@{/todos/new}" class="btn-add">+ 새 Todo</a>
+    </div>
+
+    <!-- 목록이 비어있을 때 -->
+    <div class="empty-box" th:if="${#lists.isEmpty(todos)}">
+        등록된 Todo가 없습니다. 새 Todo를 추가해보세요!
+    </div>
+
+    <!-- 목록 -->
+    <div class="todo-list" th:unless="${#lists.isEmpty(todos)}">
+        <div class="todo-card" th:each="todo : ${todos}" th:classappend="${todo.done} ? 'done'">
+
+            <!-- 완료 체크박스 -->
+            <form th:action="@{/todos/{id}/done(id=${todo.id})}" method="post">
+                <input type="checkbox"
+                       name="isDone"
+                       value="true"
+                       th:checked="${todo.done}"
+                       onchange="this.form.submit()"
+                       title="완료 처리">
+            </form>
+
+            <!-- Todo 내용 -->
+            <div class="todo-content">
+                <div class="todo-title" th:text="${todo.title}">제목</div>
+                <div class="todo-desc"
+                     th:if="${todo.description != null and !todo.description.isEmpty()}"
+                     th:text="${todo.description}">설명</div>
+            </div>
+
+            <!-- 삭제 버튼 -->
+            <form th:action="@{/todos/{id}/delete(id=${todo.id})}" method="post">
+                <button type="submit" class="btn-delete"
+                        onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
