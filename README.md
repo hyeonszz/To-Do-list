@@ -3,6 +3,11 @@
 세션 기반 로그인을 지원하는 개인 투두 리스트 웹 애플리케이션입니다.  
 Spring Boot + Thymeleaf 기반으로 구현되었으며, 로그인한 사용자만 자신의 Todo를 관리할 수 있습니다.
 
+# 🤖 AI Assisted Development
+
+본 프로젝트는 Claude Code를 활용한 실습 프로젝트입니다.
+Claude Code를 사용하여 기본적인 코드 구조를 생성했습니다. 
+
 ---
 
 ## 🛠 Tech Stack
