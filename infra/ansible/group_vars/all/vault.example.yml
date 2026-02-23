@@ -1,8 +1,0 @@
----
-# Copy to group_vars/all/vault.yml and encrypt it.
-# ansible-vault encrypt group_vars/all/vault.yml
-
-vault_db_password: "CHANGE_ME_DB_PASSWORD"
-vault_iscsi_incoming_user: "CHANGE_ME_ISCSI_USER"
-vault_iscsi_incoming_password: "CHANGE_ME_ISCSI_PASSWORD"
-
