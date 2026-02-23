@@ -1,0 +1,16 @@
+---
+- name: Step 7 - Keep step 6 base
+  import_playbook: step6_add_iscsi.yml
+
+- name: Step 7 - Add DNS server
+  hosts: dns
+  become: true
+  vars:
+    dns_records:
+      - name: "{{ dns_app_record }}"
+        ip: "{{ hostvars[groups['lb_web'][0]].ansible_host | default(groups['lb_web'][0]) }}"
+      - name: "{{ dns_db_record }}"
+        ip: "{{ hostvars[groups['lb_db'][0]].ansible_host | default(groups['lb_db'][0]) }}"
+  roles:
+    - dns
+

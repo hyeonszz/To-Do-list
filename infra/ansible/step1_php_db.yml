@@ -1,0 +1,15 @@
+---
+- name: Step 1 - Web <-> DB direct
+  hosts: db
+  become: true
+  roles:
+    - db
+
+- name: Step 1 - PHP web servers
+  hosts: web
+  become: true
+  vars:
+    db_endpoint: "{{ hostvars[groups['db'][0]].ansible_host | default(groups['db'][0]) }}"
+  roles:
+    - web
+

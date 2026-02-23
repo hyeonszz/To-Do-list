@@ -1,0 +1,18 @@
+---
+- name: Step 5 - Keep step 4 base
+  import_playbook: step4_add_db_redundancy.yml
+
+- name: Step 5 - Add NFS server
+  hosts: nfs
+  become: true
+  roles:
+    - nfs_server
+
+- name: Step 5 - Mount NFS on web servers
+  hosts: web
+  become: true
+  vars:
+    nfs_server_ip: "{{ hostvars[groups['nfs'][0]].ansible_host | default(groups['nfs'][0]) }}"
+  roles:
+    - nfs_client
+

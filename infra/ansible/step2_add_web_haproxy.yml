@@ -1,0 +1,21 @@
+---
+- name: Step 2 - Base DB and Web
+  hosts: db:web
+  become: true
+  roles:
+    - role: db
+      when: "'db' in group_names"
+    - role: web
+      when: "'web' in group_names"
+
+- name: Step 2 - Add web load balancer (HAProxy)
+  hosts: lb_web
+  become: true
+  vars:
+    lb_mode: http
+    frontend_port: 80
+    backend_group: web
+    backend_port: 80
+  roles:
+    - lb
+
