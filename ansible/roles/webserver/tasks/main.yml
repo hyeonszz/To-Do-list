@@ -4,7 +4,8 @@
     name:
       - httpd
       - php
-      - php-mysqlnd
+      - php-pgsql
+      - php-pdo
     state: present
 
 - name: Apache 시작 및 자동시작 등록

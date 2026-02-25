@@ -1,55 +1,77 @@
 ---
-- name: Install MariaDB
+- name: PostgreSQL 설치
   dnf:
     name:
-      - mariadb-server
-      - python3-PyMySQL
+      - postgresql-server
+      - postgresql-contrib
+      - python3-psycopg2
     state: present
 
-- name: Start and enable MariaDB
+- name: PostgreSQL 초기화
+  command: postgresql-setup --initdb
+  args:
+    creates: /var/lib/pgsql/data/postgresql.conf
+
+- name: PostgreSQL 시작 및 자동시작 등록
   service:
-    name: mariadb
+    name: postgresql
     state: started
     enabled: true
 
-- name: Ensure DB password provided
-  assert:
-    that:
-      - db_password is defined
-      - db_password | length > 0
-    fail_msg: "Set TODOAPP_DB_PASSWORD before running ansible-playbook."
-
-- name: Allow MySQL in firewalld
+- name: 방화벽 PostgreSQL 허용
   firewalld:
-    service: mysql
+    service: postgresql
     permanent: true
     state: enabled
     immediate: true
 
-- name: Create database
-  mysql_db:
+- name: 원격 접속 허용 (postgresql.conf)
+  lineinfile:
+    path: /var/lib/pgsql/data/postgresql.conf
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '*'"
+  notify: restart postgresql
+
+- name: 원격 접속 허용 (pg_hba.conf)
+  lineinfile:
+    path: /var/lib/pgsql/data/pg_hba.conf
+    line: "host    all             all             0.0.0.0/0               md5"
+    insertafter: EOF
+  notify: restart postgresql
+
+- name: DB 생성
+  become_user: postgres
+  postgresql_db:
     name: "{{ db_name }}"
     state: present
-    login_unix_socket: /var/lib/mysql/mysql.sock
 
-- name: Create database user and grant privileges
-  mysql_user:
+- name: DB 사용자 생성 및 권한 부여
+  become_user: postgres
+  postgresql_user:
     name: "{{ db_user }}"
     password: "{{ db_password }}"
-    priv: "{{ db_name }}.*:ALL"
-    host: "%"
+    db: "{{ db_name }}"
+    priv: "ALL"
     state: present
-    login_unix_socket: /var/lib/mysql/mysql.sock
 
-- name: Create table and seed sample data
-  mysql_query:
-    login_db: "{{ db_name }}"
-    login_unix_socket: /var/lib/mysql/mysql.sock
-    query:
-      - |
-        CREATE TABLE IF NOT EXISTS {{ db_table }} (
-          id   INT AUTO_INCREMENT PRIMARY KEY,
-          name VARCHAR(50) NOT NULL
-        );
-      - |
-        INSERT IGNORE INTO {{ db_table }} (id, name) VALUES (1, 'kim'), (2, 'lee');
+- name: public 스키마 권한 부여
+  become_user: postgres
+  postgresql_privs:
+    db: "{{ db_name }}"
+    role: "{{ db_user }}"
+    type: schema
+    objs: public
+    privs: ALL
+
+- name: 테이블 생성 및 샘플 데이터 삽입
+  become_user: postgres
+  postgresql_query:
+    db: "{{ db_name }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS {{ db_table }} (
+        id   SERIAL PRIMARY KEY,
+        name VARCHAR(50) NOT NULL
+      );
+      INSERT INTO {{ db_table }} (id, name) VALUES (1, 'kim'), (2, 'lee')
+      ON CONFLICT (id) DO NOTHING;
+

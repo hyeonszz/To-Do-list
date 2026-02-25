@@ -39,9 +39,17 @@ out/
 ### ai ###
 .ai
 
-# Local secret config
+# -------------------------------------------------------
+# Spring Boot 민감 정보
+# -------------------------------------------------------
 src/main/resources/application-local.properties
+
+# 환경변수 파일
 .env
 .env.*
-!.env.example
+
+# -------------------------------------------------------
+# Ansible 민감 정보
+# -------------------------------------------------------
+ansible/group_vars/vault.yml
 ansible/.vault_pass

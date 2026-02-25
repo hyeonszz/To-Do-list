@@ -1,0 +1,27 @@
+global
+    log         127.0.0.1 local2
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+
+defaults
+    mode                    tcp
+    log                     global
+    option                  tcplog
+    option                  dontlognull
+    retries                 3
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+
+frontend db_front
+    bind *:5432
+    default_backend db_servers
+
+backend db_servers
+    balance     roundrobin
+    server db1 192.0.2.21:5432 check
+    server db2 192.0.2.22:5432 check

@@ -1,6 +1,10 @@
 # 공통 변수
-db_host: 192.0.2.21
-db_name: web_db
-db_user: web_user
-db_password: "{{ lookup('ansible.builtin.env', 'TODOAPP_DB_PASSWORD') | default('', true) }}"
+db_host: 192.0.2.21       # db1 직접 접속 주소 (1~3단계)
+db_lb_host: 192.0.2.32    # lbdb1 로드밸런서 주소 (4단계~)
+db_name: tododb
 db_table: web_tab
+db_port: 5432
+
+# 민감 정보는 group_vars/vault.yml 에서 관리
+db_user: "{{ vault_db_user }}"
+db_password: "{{ vault_db_password }}"

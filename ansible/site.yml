@@ -18,3 +18,17 @@
   become: true
   roles:
     - haproxy_web
+
+# 3단계: HAProxy DB 로드밸런서 구성
+- name: DB 로드밸런서 구성 (HAProxy)
+  hosts: lbdb
+  become: true
+  roles:
+    - haproxy_db
+
+# 4단계: 웹서버 PHP → DB 로드밸런서 경유 연결
+- name: 웹서버 index.php DB 연결을 lbdb1으로 변경
+  hosts: webservers
+  become: true
+  roles:
+    - webserver
