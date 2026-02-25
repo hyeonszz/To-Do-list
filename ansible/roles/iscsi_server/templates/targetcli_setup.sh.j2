@@ -1,0 +1,16 @@
+#!/bin/bash
+targetcli <<EOF
+cd /backstores/fileio
+create db-storage /srv/iscsi/db-storage.img 10G
+cd /iscsi
+create iqn.2026-02.com.sesac:db-storage
+cd iqn.2026-02.com.sesac:db-storage/tpg1/luns
+create /backstores/fileio/db-storage
+cd ../acls
+create iqn.2026-02.com.sesac:db1
+create iqn.2026-02.com.sesac:db2
+cd ../portals
+create 0.0.0.0 3260
+cd /
+saveconfig
+EOF

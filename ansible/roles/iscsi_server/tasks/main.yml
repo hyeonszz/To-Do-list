@@ -1,0 +1,42 @@
+---
+- name: targetcli 설치 (iSCSI target)
+  dnf:
+    name:
+      - targetcli
+      - python3-pyudev
+    state: present
+
+- name: target 서비스 시작 및 자동시작 등록
+  service:
+    name: target
+    state: started
+    enabled: true
+
+- name: 방화벽 iSCSI 포트 허용 (3260)
+  firewalld:
+    port: 3260/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: iSCSI 백스토어 디렉토리 생성
+  file:
+    path: /srv/iscsi
+    state: directory
+    mode: '0700'
+
+- name: iSCSI 이미지 파일 생성 (10GB)
+  command: truncate -s 10G /srv/iscsi/db-storage.img
+  args:
+    creates: /srv/iscsi/db-storage.img
+
+- name: targetcli 스크립트 배포
+  template:
+    src: targetcli_setup.sh.j2
+    dest: /tmp/targetcli_setup.sh
+    mode: '0755'
+
+- name: targetcli 설정 실행
+  command: bash /tmp/targetcli_setup.sh
+  args:
+    creates: /etc/target/saveconfig.json

@@ -45,3 +45,29 @@
   become: true
   roles:
     - nfs_client
+
+# 6단계: iSCSI 서버 구성 + DB 서버 iSCSI 마운트 + LVM
+- name: iSCSI 서버 구성
+  hosts: iscsi
+  become: true
+  roles:
+    - iscsi_server
+
+- name: DB 서버 iSCSI 클라이언트 + LVM 구성
+  hosts: dbservers
+  become: true
+  roles:
+    - iscsi_client
+
+# 7단계: DNS 서버 구성 + 모든 VM DNS 설정
+- name: DNS 서버 구성
+  hosts: dns
+  become: true
+  roles:
+    - dns_server
+
+- name: 모든 VM DNS 클라이언트 설정
+  hosts: all
+  become: true
+  roles:
+    - dns_client

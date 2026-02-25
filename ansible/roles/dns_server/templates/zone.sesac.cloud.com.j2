@@ -1,0 +1,25 @@
+$TTL 86400
+@   IN  SOA dns1.sesac.cloud.com. admin.sesac.cloud.com. (
+            2026022501  ; Serial
+            3600        ; Refresh
+            1800        ; Retry
+            604800      ; Expire
+            86400 )     ; Minimum TTL
+
+; 네임서버
+@       IN  NS  dns1.sesac.cloud.com.
+
+; 호스트 레코드
+dns1    IN  A   {{ dns_host }}
+web1    IN  A   192.0.2.11
+web2    IN  A   192.0.2.12
+db1     IN  A   192.0.2.21
+db2     IN  A   192.0.2.22
+lbweb1  IN  A   192.0.2.31
+lbdb1   IN  A   192.0.2.32
+nfs1    IN  A   192.0.2.41
+iscsi1  IN  A   192.0.2.51
+
+; 서비스 도메인 (로드밸런서 주소로)
+www     IN  A   192.0.2.31
+db      IN  A   192.0.2.32

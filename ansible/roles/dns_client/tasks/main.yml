@@ -1,0 +1,8 @@
+---
+- name: DNS 서버 설정 (/etc/resolv.conf)
+  template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'

@@ -1,0 +1,38 @@
+---
+- name: BIND DNS 설치
+  dnf:
+    name:
+      - bind
+      - bind-utils
+    state: present
+
+- name: named.conf 설정
+  template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: named
+    mode: '0640'
+  notify: restart named
+
+- name: 정방향 존 파일 배포
+  template:
+    src: zone.sesac.cloud.com.j2
+    dest: /var/named/zone.sesac.cloud.com
+    owner: root
+    group: named
+    mode: '0640'
+  notify: restart named
+
+- name: named 서비스 시작 및 자동시작 등록
+  service:
+    name: named
+    state: started
+    enabled: true
+
+- name: 방화벽 DNS 허용
+  firewalld:
+    service: dns
+    permanent: true
+    state: enabled
+    immediate: true

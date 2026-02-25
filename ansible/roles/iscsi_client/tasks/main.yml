@@ -1,0 +1,68 @@
+---
+- name: iSCSI initiator 설치
+  dnf:
+    name: iscsi-initiator-utils
+    state: present
+
+- name: initiator IQN 설정
+  template:
+    src: initiatorname.iscsi.j2
+    dest: /etc/iscsi/initiatorname.iscsi
+    mode: '0644'
+  notify: restart iscsid
+
+- name: iscsid 서비스 시작
+  service:
+    name: iscsid
+    state: started
+    enabled: true
+
+- name: iSCSI 타겟 디스커버리
+  command: iscsiadm -m discovery -t sendtargets -p {{ iscsi_host }}:3260
+  register: discovery_result
+  changed_when: false
+
+- name: iSCSI 타겟 로그인
+  command: iscsiadm -m node -T iqn.2026-02.com.sesac:db-storage -p {{ iscsi_host }}:3260 --login
+  register: login_result
+  failed_when:
+    - login_result.rc != 0
+    - "'already exists' not in login_result.stderr"
+  changed_when: "'already exists' not in login_result.stderr"
+
+- name: LVM - pvcreate
+  command: pvcreate /dev/sdb
+  register: pvcreate_result
+  failed_when:
+    - pvcreate_result.rc != 0
+    - "'already exists' not in pvcreate_result.stderr"
+  changed_when: "'already exists' not in pvcreate_result.stderr"
+
+- name: LVM - vgcreate
+  command: vgcreate vg_db /dev/sdb
+  register: vgcreate_result
+  failed_when:
+    - vgcreate_result.rc != 0
+    - "'already exists' not in vgcreate_result.stderr"
+  changed_when: "'already exists' not in vgcreate_result.stderr"
+
+- name: LVM - lvcreate
+  command: lvcreate -l 100%FREE -n lv_db vg_db
+  register: lvcreate_result
+  failed_when:
+    - lvcreate_result.rc != 0
+    - "'already exists' not in lvcreate_result.stderr"
+  changed_when: "'already exists' not in lvcreate_result.stderr"
+
+- name: 파일시스템 생성 (ext4)
+  filesystem:
+    fstype: ext4
+    dev: /dev/vg_db/lv_db
+
+- name: PostgreSQL 데이터 디렉토리 마운트
+  mount:
+    path: /var/lib/pgsql
+    src: /dev/vg_db/lv_db
+    fstype: ext4
+    opts: defaults
+    state: mounted
