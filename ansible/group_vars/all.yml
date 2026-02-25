@@ -1,0 +1,6 @@
+# 공통 변수
+db_host: 192.0.2.21
+db_name: web_db
+db_user: web_user
+db_password: "123"
+db_table: web_tab

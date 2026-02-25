@@ -1,0 +1,48 @@
+---
+- name: MariaDB 설치
+  dnf:
+    name:
+      - mariadb-server
+      - python3-PyMySQL
+    state: present
+
+- name: MariaDB 시작 및 자동시작 등록
+  service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: 방화벽 MySQL 허용
+  firewalld:
+    service: mysql
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: DB 생성
+  mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_unix_socket: /var/lib/mysql/mysql.sock
+
+- name: DB 사용자 생성 및 권한 부여
+  mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+    login_unix_socket: /var/lib/mysql/mysql.sock
+
+- name: 테이블 생성 및 샘플 데이터 삽입
+  mysql_query:
+    login_db: "{{ db_name }}"
+    login_unix_socket: /var/lib/mysql/mysql.sock
+    query:
+      - |
+        CREATE TABLE IF NOT EXISTS {{ db_table }} (
+          id   INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(50) NOT NULL
+        );
+      - |
+        INSERT IGNORE INTO {{ db_table }} (id, name) VALUES (1, 'kim'), (2, 'lee');

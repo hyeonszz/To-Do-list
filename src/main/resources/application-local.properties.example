@@ -1,0 +1,12 @@
+# -------------------------------------------------------
+# 이 파일을 복사해서 application-local.properties 로 이름을 바꾼 후
+# 본인의 로컬 DB 정보로 채워주세요.
+# application-local.properties 는 .gitignore 처리되어 GitHub에 올라가지 않습니다.
+# -------------------------------------------------------
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/tododb
+spring.datasource.username=YOUR_DB_USERNAME
+spring.datasource.password=YOUR_DB_PASSWORD
+
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true

@@ -1,0 +1,20 @@
+---
+# 1단계: WebServer + DatabaseServer (PHP 연동)
+- name: DB 서버 구성
+  hosts: dbservers
+  become: true
+  roles:
+    - dbserver
+
+- name: Web 서버 구성
+  hosts: webservers
+  become: true
+  roles:
+    - webserver
+
+# 2단계: HAProxy 웹 로드밸런서 구성
+- name: 웹 로드밸런서 구성 (HAProxy)
+  hosts: lbweb
+  become: true
+  roles:
+    - haproxy_web

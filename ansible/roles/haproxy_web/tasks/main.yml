@@ -1,0 +1,27 @@
+---
+- name: HAProxy 설치
+  dnf:
+    name: haproxy
+    state: present
+
+- name: HAProxy 설정 파일 배포
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart haproxy
+
+- name: HAProxy 시작 및 자동시작 등록
+  service:
+    name: haproxy
+    state: started
+    enabled: true
+
+- name: 방화벽 80 포트 허용
+  firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+    immediate: true

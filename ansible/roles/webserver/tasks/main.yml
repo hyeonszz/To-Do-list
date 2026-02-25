@@ -1,0 +1,29 @@
+---
+- name: Apache + PHP 설치
+  dnf:
+    name:
+      - httpd
+      - php
+      - php-mysqlnd
+    state: present
+
+- name: Apache 시작 및 자동시작 등록
+  service:
+    name: httpd
+    state: started
+    enabled: true
+
+- name: 방화벽 HTTP 허용
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: index.php 배포
+  template:
+    src: index.php.j2
+    dest: /var/www/html/index.php
+    owner: apache
+    group: apache
+    mode: '0644'
