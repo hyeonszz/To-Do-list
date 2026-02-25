@@ -1,0 +1,19 @@
+---
+- name: NFS 클라이언트 패키지 설치
+  dnf:
+    name:
+      - nfs-utils
+    state: present
+
+- name: 기존 index.php 삭제 (NFS로 대체)
+  file:
+    path: /var/www/html/index.php
+    state: absent
+
+- name: NFS 마운트 (nfs1 → /var/www/html)
+  mount:
+    path: /var/www/html
+    src: "{{ nfs_host }}:/srv/nfs/web"
+    fstype: nfs
+    opts: defaults
+    state: mounted

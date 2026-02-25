@@ -51,5 +51,5 @@ src/main/resources/application-local.properties
 # -------------------------------------------------------
 # Ansible 민감 정보
 # -------------------------------------------------------
-ansible/group_vars/vault.yml
+ansible/group_vars/all/vault.yml
 ansible/.vault_pass

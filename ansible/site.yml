@@ -32,3 +32,16 @@
   become: true
   roles:
     - webserver
+
+# 5단계: NFS 서버 구성 + 웹서버 NFS 마운트
+- name: NFS 서버 구성
+  hosts: nfs
+  become: true
+  roles:
+    - nfs_server
+
+- name: 웹서버 NFS 마운트 (index.php 공유)
+  hosts: webservers
+  become: true
+  roles:
+    - nfs_client

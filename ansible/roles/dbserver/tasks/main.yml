@@ -12,6 +12,18 @@
   args:
     creates: /var/lib/pgsql/data/postgresql.conf
 
+- name: 원격 접속 허용 (postgresql.conf)
+  lineinfile:
+    path: /var/lib/pgsql/data/postgresql.conf
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '*'"
+
+- name: 원격 접속 허용 (pg_hba.conf)
+  lineinfile:
+    path: /var/lib/pgsql/data/pg_hba.conf
+    line: "host    all             all             0.0.0.0/0               md5"
+    insertafter: EOF
+
 - name: PostgreSQL 시작 및 자동시작 등록
   service:
     name: postgresql
@@ -24,20 +36,6 @@
     permanent: true
     state: enabled
     immediate: true
-
-- name: 원격 접속 허용 (postgresql.conf)
-  lineinfile:
-    path: /var/lib/pgsql/data/postgresql.conf
-    regexp: "^#?listen_addresses"
-    line: "listen_addresses = '*'"
-  notify: restart postgresql
-
-- name: 원격 접속 허용 (pg_hba.conf)
-  lineinfile:
-    path: /var/lib/pgsql/data/pg_hba.conf
-    line: "host    all             all             0.0.0.0/0               md5"
-    insertafter: EOF
-  notify: restart postgresql
 
 - name: DB 생성
   become_user: postgres

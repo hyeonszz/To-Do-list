@@ -1,8 +1,16 @@
 ---
 - name: HAProxy 설치
   dnf:
-    name: haproxy
+    name:
+      - haproxy
+      - python3-libsemanage
     state: present
+
+- name: SELinux - haproxy connect any port 허용
+  ansible.posix.seboolean:
+    name: haproxy_connect_any
+    state: true
+    persistent: true
 
 - name: HAProxy 설정 파일 배포
   template:

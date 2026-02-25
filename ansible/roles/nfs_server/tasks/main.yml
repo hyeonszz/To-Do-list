@@ -1,0 +1,46 @@
+---
+- name: NFS 서버 패키지 설치
+  dnf:
+    name:
+      - nfs-utils
+    state: present
+
+- name: NFS 서비스 시작 및 자동시작 등록
+  service:
+    name: nfs-server
+    state: started
+    enabled: true
+
+- name: 공유 디렉토리 생성
+  file:
+    path: /srv/nfs/web
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: index.php 배포 (NFS 공유 디렉토리에)
+  template:
+    src: index.php.j2
+    dest: /srv/nfs/web/index.php
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: NFS exports 설정
+  lineinfile:
+    path: /etc/exports
+    line: "/srv/nfs/web 192.0.2.0/24(rw,sync,no_root_squash)"
+    create: true
+  notify: exportfs reload
+
+- name: 방화벽 NFS 허용
+  firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+    - nfs
+    - mountd
+    - rpc-bind
