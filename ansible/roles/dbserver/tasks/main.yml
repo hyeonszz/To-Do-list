@@ -1,31 +1,38 @@
 ---
-- name: MariaDB 설치
+- name: Install MariaDB
   dnf:
     name:
       - mariadb-server
       - python3-PyMySQL
     state: present
 
-- name: MariaDB 시작 및 자동시작 등록
+- name: Start and enable MariaDB
   service:
     name: mariadb
     state: started
     enabled: true
 
-- name: 방화벽 MySQL 허용
+- name: Ensure DB password provided
+  assert:
+    that:
+      - db_password is defined
+      - db_password | length > 0
+    fail_msg: "Set TODOAPP_DB_PASSWORD before running ansible-playbook."
+
+- name: Allow MySQL in firewalld
   firewalld:
     service: mysql
     permanent: true
     state: enabled
     immediate: true
 
-- name: DB 생성
+- name: Create database
   mysql_db:
     name: "{{ db_name }}"
     state: present
     login_unix_socket: /var/lib/mysql/mysql.sock
 
-- name: DB 사용자 생성 및 권한 부여
+- name: Create database user and grant privileges
   mysql_user:
     name: "{{ db_user }}"
     password: "{{ db_password }}"
@@ -34,7 +41,7 @@
     state: present
     login_unix_socket: /var/lib/mysql/mysql.sock
 
-- name: 테이블 생성 및 샘플 데이터 삽입
+- name: Create table and seed sample data
   mysql_query:
     login_db: "{{ db_name }}"
     login_unix_socket: /var/lib/mysql/mysql.sock

@@ -7,7 +7,7 @@ $password = "{{ db_password }}";
 $conn = new mysqli($host, $username, $password, $dbname);
 
 if ($conn->connect_error) {
-    die("<h2>DB 연결 실패: " . $conn->connect_error . "</h2>");
+    die("<h2>DB 연결 실패</h2>");
 }
 
 echo "<h1>DB 연결 성공!</h1>";
@@ -18,7 +18,7 @@ $result = $conn->query("SELECT * FROM {{ db_table }}");
 echo "<table border='1' cellpadding='8'>";
 echo "<tr><th>ID</th><th>Name</th></tr>";
 while ($row = $result->fetch_assoc()) {
-    echo "<tr><td>" . $row['id'] . "</td><td>" . $row['name'] . "</td></tr>";
+    echo "<tr><td>" . htmlspecialchars((string)$row['id']) . "</td><td>" . htmlspecialchars((string)$row['name']) . "</td></tr>";
 }
 echo "</table>";
 

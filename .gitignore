@@ -38,3 +38,10 @@ out/
 
 ### ai ###
 .ai
+
+# Local secret config
+src/main/resources/application-local.properties
+.env
+.env.*
+!.env.example
+ansible/.vault_pass
